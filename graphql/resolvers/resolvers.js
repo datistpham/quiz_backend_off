@@ -282,8 +282,12 @@ export const resolvers= {
             }            
         },
         add_term_to_class: async (parent, args, context)=> {
+            // notify all user in class about new term
             try {
+                const [all_member_class]= await connection.execute("SELECT DISTINCT id_user FROM member_of_class WHERE id_class= ?", [args.id_class]) 
+                console.log(all_member_class)
                 const [rows]= await connection.execute("INSERT INTO `term_of_class` VALUES(?, ?, ?, ?, ?)", [args.id_class, args.id_term, args.own_id, args.add_by, new Date()])
+                connection.execute("INSERT INTO notification_main VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [uuidv4(), ])
                 return {is_add: true, exist: false}
             } catch (error) {
                 return {is_add: false, exist: true}
